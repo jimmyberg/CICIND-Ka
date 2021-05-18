@@ -1,6 +1,6 @@
 # CICIND damping parameter
 
-This repository holds the damping parameter as mentioned in the CICIND commentaries and appendices for model code for steel chimneys.
+This repository holds the aerodynamic damping parameter as mentioned in the CICIND commentaries and appendices for model code for steel chimneys.
 The table can be found in KA_mean.csv.
 
 ![image-aerodynamic-damping-paraketer](https://github.com/jimmyberg/CICIND-Ka/blob/0f396a4453081dfe2880cbf47d19114f26d4d5d5/Aerodynamic%20damping%20parameter.svg)
