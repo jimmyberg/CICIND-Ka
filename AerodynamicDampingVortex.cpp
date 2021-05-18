@@ -3,34 +3,21 @@
 #include <fstream>
 
 void AerodynamicDampingVortex::loadKaMean(const char* filePath){
-	// Function expects first four lines to be reserved for comments. Then the
-	// first line of data gives the number of measured turbulences scales
-	// followed by the number of mean wind speeds measured. The data consist of
-	// blocks, each block contains a number representing the turbulence
-	// intensity. This is then followed by samples for that turbulence intensity
-	// of the wind speed followed by the damping parameter separated by a comma.
-	// <turbulenceVal>
-	// <speed>,<damping>
-	// <speed>,<damping>
-	// <speed>,<damping>
-	// <speed>,<damping>
-	// ...
+	// File is a typical multi collum data set. First row holds titles and
+	// turbulance scales for each collumn. First collumn holds relative wind
+	// critical speed v/v_cr. Then each row contains the aerodynamic damping
+	// parameter.
 	std::ifstream iFile;
 	iFile.exceptions(std::ifstream::eofbit | std::ifstream::failbit | std::ifstream::badbit);
 
 	iFile.open(filePath);
-	iFile.ignore(256, '\n');
-	iFile.ignore(256, '\n');
-	iFile.ignore(256, '\n');
-	iFile.ignore(256, '\n');
 	// For basic exception safety guarantee. If something throws, we make sure
 	// everything is valid.
 	try{
 		char charBuffer[16];
-		iFile.getline(charBuffer, 256, ',');
-		numberOfTurbulenceScales = atoi(charBuffer);
-		iFile.getline(charBuffer, 256, '\n');
-		numberOfWindspeedScales = atoi(charBuffer);
+		numberOfTurbulenceScales = 7;
+		numberOfWindspeedScales = 122;
+
 		// Allocate data space
 		if(ka_mean_turbulence != nullptr)
 			delete [] ka_mean_turbulence;
@@ -41,17 +28,22 @@ void AerodynamicDampingVortex::loadKaMean(const char* filePath){
 		if(ka_mean_damping != nullptr)
 			delete [] ka_mean_damping;
 		ka_mean_damping        = new float[numberOfTurbulenceScales * numberOfWindspeedScales];
+
 		// Load data values in data space
+		iFile.getline(charBuffer, 256, ',');
 		for (unsigned int turbulenceIndex = 0; turbulenceIndex < numberOfTurbulenceScales; ++turbulenceIndex){
 			iFile.getline(charBuffer, 256, ',');
 			ka_mean_turbulence[turbulenceIndex] = atof(charBuffer);
-			iFile.ignore(256, '\n');
-			const unsigned int offSet = turbulenceIndex*numberOfWindspeedScales;
-			float* zArray = &ka_mean_damping[offSet];
-			for (unsigned int speedIndex = 0; speedIndex < numberOfWindspeedScales; ++speedIndex){
+		}
+		for (unsigned int speedIndex = 0; speedIndex < numberOfWindspeedScales; ++speedIndex){
+			// iFile.ignore(256, '\n');
+			iFile.getline(charBuffer, 256, ',');
+			ka_mean_referenceSpeed[speedIndex] = atof(charBuffer);
+			for (unsigned int turbulenceIndex = 0; turbulenceIndex < numberOfTurbulenceScales; ++turbulenceIndex){
+				const unsigned int offSet = turbulenceIndex*numberOfWindspeedScales;
+				float* zArray = &ka_mean_damping[offSet];
 				iFile.getline(charBuffer, 256, ',');
-				ka_mean_referenceSpeed[speedIndex] = atof(charBuffer);
-				iFile >> zArray[speedIndex];
+				zArray[speedIndex] = atof(charBuffer);
 			}
 		}
 	}

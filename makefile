@@ -35,4 +35,4 @@ remove:
 	for i in $$(ls *.h); do sudo rm -v /usr/local/include/$$i; done
 
 clean:
-	rm *.o *.so* prog 
+	rm *.o *.so* prog
